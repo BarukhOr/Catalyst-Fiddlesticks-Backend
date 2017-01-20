@@ -4,13 +4,13 @@
 
 const config = require("../config/index.js");
 const db = require("../db_connect/index.js");
-
+const fs = require("fs");
 const bcrypt = require("bcrypt-as-promised");
 const bluebird = require("bluebird");
 const jwt = require("jsonwebtoken");
 const preparedStatement = require("pg-promise").PreparedStatement;
-const passport = require("passport");
 const joi = require("joi");
+const promise = require("promise");
 const validate = bluebird.promisify(joi.validate);
 
 
@@ -26,6 +26,7 @@ const permissions ={
     "student":32,
     "casual":64
 };
+exports.permissions = permissions;
 
 const schema = joi.object().keys({
     email: joi.string().email(),
@@ -35,7 +36,6 @@ const schema = joi.object().keys({
     region: joi.string().regex(/^.{2,30}$/)
 });
 
-exports.permissions = permissions;
 module.exports = {
     signup: function (req, res){
         "use strict";
@@ -92,7 +92,7 @@ module.exports = {
                 }
             })
     },
-    
+
     signin: function (req, res, next) {
         "use strict";
         const AuthVerifyAccount=new preparedStatement("Auth verify-account", "SELECT account_id, max_weekly_sessions, upassword as password, role FROM account WHERE email = $1LIMIT 1");
@@ -110,7 +110,7 @@ module.exports = {
 
                                 // // TODO: Implement is Student/Coach Check
                                 // // TODO: Append to req. account_type and add the flag student or coach (by default set it to student)
-                                
+
                                 req.body = "";
                                 req.account = account;
                                 req.account_type = "student";
@@ -132,6 +132,18 @@ module.exports = {
             })
     },
 
+    passwordEncrypt: function(token){
+      return new Promise(function(fullfill, reject){
+        bcrypt.hash(token, 10)
+            .then(function(hash){
+                fullfill(hash)
+            })
+            .catch(function(error){
+                console.log("ERROR:", error.message || error);
+                reject(error)
+            });
+      })
+    },
 
     jwtLogin: function(request, response, next){
         "use strict";

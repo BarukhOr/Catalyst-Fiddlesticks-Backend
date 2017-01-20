@@ -1,7 +1,8 @@
 /**
  * Created by utibe on 1/13/17.
  */
-const Auth = require("../controllers/authentication.js");
+const auth = require("../controllers/authentication.js");
+const user = require("../controllers/user.js");
 
 module.exports = function (app) {
     "use strict";
@@ -12,19 +13,22 @@ module.exports = function (app) {
     });
 
     // A signup route that is used to create admins
-    app.post("/signup",Auth.signup);
- 
+    app.post("/signup",auth.signup);
+
     // Signin route
-    app.post("/auth", Auth.signin, Auth.tokenForUser);
+    app.post("/auth", auth.signin, auth.tokenForUser);
 
     // A test route that requires authentication
-    app.get("/protected", Auth.jwtLogin,function(req, res){
+    app.get("/protected", auth.jwtLogin,function(req, res){
         return res.status(200).json({message: "yes you are logged in~"});
     })
 
     // TODO: Implement a route for devs to create students
+    app.get("/maker", user.createStudent )
 
     // TODO: Implement a route for devs to create coaches
+
+    // TODO: Implment a route for devs to create users (neither student/coach)
 
     // TODO: Implement get all availabilities
 
