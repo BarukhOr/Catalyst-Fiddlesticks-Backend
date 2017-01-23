@@ -7,24 +7,24 @@ const user = require("../controllers/user.js");
 module.exports = function (app) {
     "use strict";
 
-    app.get("/", function (req, res) {
-        const message = req._remoteAddress + " You have come across a well placed shroom";
-        return res.status(200).json({message: message});
+    app.get("/", function (request, response) {
+        const message = request._remoteAddress + " You have come across a well placed shroom";
+        return response.status(200).json({message: message});
     });
 
     // A signup route that is used to create admins
-    app.post("/signup",auth.signup);
+    app.post("/signup", auth.signup);
 
-    // Signin route
-    app.post("/auth", auth.signin, auth.tokenForUser);
+    // // Signin route
+    // app.post("/auth", auth.signin, auth.tokenForUser);
 
-    // A test route that requires authentication
-    app.get("/protected", auth.jwtLogin,function(req, res){
-        return res.status(200).json({message: "yes you are logged in~"});
+    // // A test route that requires authentication
+    app.get("/protected", auth.jwtLogin, function (request, response) {
+        return response.status(200).json({message: "yes you are logged in~"});
     })
 
     // TODO: Implement a route for devs to create students
-    app.get("/maker", user.createStudent )
+    // app.post("/maker", auth.jwtLogin, user.createStudent )
 
     // TODO: Implement a route for devs to create coaches
 

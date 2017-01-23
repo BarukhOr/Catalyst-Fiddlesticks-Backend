@@ -30,3 +30,5 @@ And that should be it
 ```
 
 ~ Happy Coding ~
+
+Note: Using JSLint for linting.

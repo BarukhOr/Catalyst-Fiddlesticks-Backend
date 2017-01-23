@@ -22,10 +22,9 @@ CREATE TABLE account (
   email VARCHAR (255) NOT NULL,
   upassword VARCHAR NOT NULL,
   name VARCHAR (255) NOT NULL,
-  ign VARCHAR (50),
-  discord_name VARCHAR (60),
-  summoner_id INTEGER UNIQUE,
   summoner_name VARCHAR,
+  summoner_id INTEGER UNIQUE,
+  discord_name VARCHAR (60),
   region VARCHAR DEFAULT 'EUW',
   date_joined TIMESTAMPTZ NOT NULL DEFAULT (now()),
   can_email BOOLEAN DEFAULT true,
@@ -33,9 +32,9 @@ CREATE TABLE account (
   max_weekly_sessions smallint default 1
 );
 
-DROP TABLE IF EXISTS Student CASCADE;
+DROP TABLE IF EXISTS student CASCADE;
 
-CREATE TABLE Student (
+CREATE TABLE student (
   student_id SERIAL PRIMARY KEY,
   account_id INTEGER NOT NULL UNIQUE,
   primary_lane VARCHAR,
@@ -49,9 +48,9 @@ CREATE TABLE Student (
 );
 
 
-DROP TABLE IF EXISTS Coach_Notes CASCADE;
+DROP TABLE IF EXISTS coach_notes CASCADE;
 
-CREATE TABLE Coach_Notes (
+CREATE TABLE coach_notes (
   coach_note_id SERIAL PRIMARY KEY,
   student_id INTEGER NOT NULL UNIQUE,
   coach_id INTEGER NOT NULL UNIQUE,
@@ -65,9 +64,9 @@ CREATE TABLE Coach_Notes (
       ON UPDATE NO ACTION ON DELETE CASCADE
 );
 
-DROP TABLE IF EXISTS Coach CASCADE;
+DROP TABLE IF EXISTS coach CASCADE;
 
-CREATE TABLE Coach (
+CREATE TABLE coach (
   coach_id SERIAL PRIMARY KEY,
   account_id INTEGER NOT NULL UNIQUE,
   peak_rank VARCHAR,
@@ -80,9 +79,9 @@ CREATE TABLE Coach (
       ON UPDATE NO ACTION ON DELETE NO ACTION
 );
 
-DROP TABLE IF EXISTS Availability CASCADE;
+DROP TABLE IF EXISTS availability CASCADE;
 
-CREATE TABLE Availability (
+CREATE TABLE availability (
   session_id SERIAL PRIMARY KEY,
   coach_id INTEGER NOT NULL,
   available_time TIMESTAMPTZ NOT NULL,
@@ -91,9 +90,9 @@ CREATE TABLE Availability (
       ON UPDATE NO ACTION ON DELETE CASCADE
 );
 
-DROP TABLE IF EXISTS Lesson CASCADE;
+DROP TABLE IF EXISTS lesson CASCADE;
 
-CREATE TABLE Lesson (
+CREATE TABLE lesson (
   session_id SERIAL PRIMARY KEY,
   coach_id INTEGER NOT NULL,
   student_id INTEGER NOT NULL,
