@@ -1,6 +1,6 @@
 {
   "name": "catalyst_fiddlesticks_backend",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "description": "an api to support the frontend",
   "main": "server.js",
   "dependencies": {

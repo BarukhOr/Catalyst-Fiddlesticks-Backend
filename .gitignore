@@ -29,3 +29,7 @@ node_modules
 
 # Holds confidential config settings
 config
+config/
+
+#IDE
+.idea

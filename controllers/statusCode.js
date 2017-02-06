@@ -4,6 +4,11 @@ module.exports = {
         return response.status(200).send({success: true, message: "success"});
     },
 
+    successfulGet: function (result, response) {
+        "use strict";
+        return response.status(200).send({success: true, message: "success", result: result});
+    },
+
     created: function (response) {
         "use strict";
         return response.status(201).send({success: true, message: "success"});

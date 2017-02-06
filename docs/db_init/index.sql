@@ -85,6 +85,7 @@ CREATE TABLE availability (
   session_id SERIAL PRIMARY KEY,
   coach_id INTEGER NOT NULL,
   available_time TIMESTAMPTZ NOT NULL,
+  booked BOOLEAN DEFAULT false,
   CONSTRAINT fk_coach_id FOREIGN KEY (coach_id)
       REFERENCES public.Account (account_id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE CASCADE
