@@ -39,4 +39,9 @@ module.exports = function (app) {
 
     app.post("/cancelLesson", auth.jwtLogin, lesson.cancelLesson);
 
+    // TODO: Test these routes
+    app.get("/myLessons", auth.jwtLogin, lesson.myWeeksLessons);
+
+    app.post("/completeLesson", auth.jwtLogin, lesson.completeLesson);
+
 };
