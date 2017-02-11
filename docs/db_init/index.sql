@@ -19,7 +19,7 @@ DROP TABLE IF EXISTS account CASCADE;
 
 CREATE TABLE account (
   account_id SERIAL PRIMARY KEY,
-  email VARCHAR (255) NOT NULL,
+  email VARCHAR (255) UNIQUE NOT NULL,
   upassword VARCHAR NOT NULL,
   name VARCHAR (255) NOT NULL,
   summoner_name VARCHAR,
@@ -29,7 +29,7 @@ CREATE TABLE account (
   date_joined TIMESTAMPTZ NOT NULL DEFAULT (now()),
   can_email BOOLEAN DEFAULT true,
   role SMALLINT DEFAULT 64,
-  max_weekly_sessions smallint default 1
+  max_weekly_lessons smallint default 1
 );
 
 DROP TABLE IF EXISTS student CASCADE;
@@ -47,22 +47,6 @@ CREATE TABLE student (
       ON UPDATE NO ACTION ON DELETE CASCADE
 );
 
-
-DROP TABLE IF EXISTS coach_notes CASCADE;
-
-CREATE TABLE coach_notes (
-  coach_note_id SERIAL PRIMARY KEY,
-  student_id INTEGER NOT NULL UNIQUE,
-  coach_id INTEGER NOT NULL UNIQUE,
-  note TEXT NOT NULL,
-  time_created TIMESTAMPTZ DEFAULT now(),
-  CONSTRAINT fk_student_id FOREIGN KEY (student_id)
-      REFERENCES public.Account (account_id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE CASCADE,
-  CONSTRAINT fk_coach_id FOREIGN KEY (coach_id)
-      REFERENCES public.Account (account_id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE CASCADE
-);
 
 DROP TABLE IF EXISTS coach CASCADE;
 
@@ -82,7 +66,7 @@ CREATE TABLE coach (
 DROP TABLE IF EXISTS availability CASCADE;
 
 CREATE TABLE availability (
-  session_id SERIAL PRIMARY KEY,
+  avail_id SERIAL PRIMARY KEY,
   coach_id INTEGER NOT NULL,
   available_time TIMESTAMPTZ NOT NULL,
   booked BOOLEAN DEFAULT false,
@@ -94,7 +78,7 @@ CREATE TABLE availability (
 DROP TABLE IF EXISTS lesson CASCADE;
 
 CREATE TABLE lesson (
-  session_id SERIAL PRIMARY KEY,
+  lesson_id SERIAL PRIMARY KEY,
   coach_id INTEGER NOT NULL,
   student_id INTEGER NOT NULL,
   lesson_time TIMESTAMPTZ NOT NULL,
@@ -105,6 +89,24 @@ CREATE TABLE lesson (
       REFERENCES public.Account (account_id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE CASCADE,
   CONSTRAINT fk_student_id FOREIGN KEY (student_id)
+      REFERENCES public.Account (account_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE CASCADE
+);
+
+
+
+DROP TABLE IF EXISTS coach_notes CASCADE;
+
+CREATE TABLE coach_notes (
+  coach_note_id SERIAL PRIMARY KEY,
+  student_id INTEGER NOT NULL UNIQUE,
+  coach_id INTEGER NOT NULL UNIQUE,
+  note TEXT NOT NULL,
+  time_created TIMESTAMPTZ DEFAULT now(),
+  CONSTRAINT fk_student_id FOREIGN KEY (student_id)
+      REFERENCES public.Account (account_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT fk_coach_id FOREIGN KEY (coach_id)
       REFERENCES public.Account (account_id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE CASCADE
 );

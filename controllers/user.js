@@ -16,7 +16,7 @@ function localCreateUser(data) {
         const token = require("crypto").randomBytes(8).toString("hex");
         auth.passwordEncrypt(token)
             .then(function (hashPassword) {
-                const createUser = new preparedStatement("Create-User", "INSERT INTO account(email, upassword, name, ign, region, role) VALUES( $1, $2, $3, $4, $5, $6) RETURNING account_id");
+                const createUser = new preparedStatement("Create-User", "INSERT INTO account(email, upassword, name, summoner_name, region, role) VALUES( $1, $2, $3, $4, $5, $6) RETURNING account_id");
                 db.one(createUser, [data.email, hashPassword, data.name, data.summoner_name, data.region, data.role])
                     .then(function (result) {
                         /**
@@ -43,12 +43,15 @@ function localCreateUser(data) {
 
 function mailToken(token, mailTo) {
     "use strict";
+    // TODO: Remove
+    console.log("Token", token);
+
     let message = "Catalyst Coaching \n\n" +
             "#### Welcome to Catalyst Coaching \n\n" +
             "[![Catalyst Coaching](https://cldup.com/dTxpPi9lDf.thumb.png)](https://shroorima.com) \n\n" +
             "Your application to Catalyst Coaching has been approved. \n\n" +
             "Please log into the [Catalyst Portal] with the password" + token + " \n\n" +
-            "[Catalyst Portal]: <https://shroorrima.com/>";
+            "[Catalyst Portal]: <https://shroorima.com/>";
 
     return new Promise(function (fullfill, reject) {
         try {
@@ -71,17 +74,17 @@ module.exports = {
             request.body.role = auth.permissions.student;
             localCreateUser(request.body)
                 .then(function (data) {
-                    console.log(data);
-                    // TODO: Create student entry in student table
-                    // const createStudent = new preparedStatement("Create-Student", "INSERT INTO student(account_id) VALUES($1) RETURNING student_id");
-                    // db.one(createStudent, [data.account_id])
-                    //     .then()
-                    //     .catch();
-                    statusCode.ok(response);
+
+                    db.none(createStudent, [data.account_id])
+                        .then(function(){
+                            statusCode.created(response);
+                        })
+                        .catch(function (error) {
+                            statusCode.internalServerError(error, response);
+                        });
                 })
                 .catch(function (error) {
-                    console.log("Error: ", error.message, error);
-                    statusCode.internalServerError(response);
+                    statusCode.internalServerError(error, response);
                 });
         } else {
             statusCode.unauthorized(response);
@@ -94,17 +97,17 @@ module.exports = {
             request.body.role = auth.permissions.coach;
             localCreateUser(request.body)
                 .then(function (data) {
-                    console.log(data);
-                    // TODO: Create a coach entry in the corresponding table
-                    // const createCoach = new preparedStatement("Create-Coach", "INSERT INTO coach(account_id) VALUES($1) RETURNING coach_id");
-                    // db.one(createCoach, [data.account_id])
-                    //     .then()
-                    //     .catch();
-                    statusCode.ok(response);
+                    const createCoach = new preparedStatement("Create-Coach", "INSERT INTO coach(account_id) VALUES($1)");
+                    db.none(createCoach, [data.account_id])
+                        .then(function(){
+                            statusCode.created(response);
+                        })
+                        .catch(function (error) {
+                            statusCode.internalServerError(error, response);
+                        });                    
                 })
                 .catch(function (error) {
-                    console.log("Error: ", error.message, error);
-                    statusCode.internalServerError(response);
+                    statusCode.internalServerError(error, response);
                 });
         } else {
             statusCode.unauthorized(response);

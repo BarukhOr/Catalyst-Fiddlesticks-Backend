@@ -30,13 +30,13 @@ const schema = joi.object().keys({
     email: joi.string().email(),
     password: joi.string().regex(/^.{8,30}$/),
     name: joi.string().regex(/^.{3,70}$/),
-    ign: joi.string().regex(/^.{3,30}$/),
+    summoner_name: joi.string().regex(/^.{3,30}$/),
     region: joi.string().regex(/^.{2,30}$/)
 });
 
 function isAdmin(role) {
     "use strict";
-    if (role && permissions.admin) {
+    if (role & permissions.admin) {
         return true;
     } else {
         return false;
@@ -44,8 +44,8 @@ function isAdmin(role) {
 }
 
 function isCoach(role) {
-    "use strict";
-    if (role && permissions.coach) {
+    "use strict"
+    if (role & permissions.coach) {
         return true;
     } else {
         return false;
@@ -54,7 +54,7 @@ function isCoach(role) {
 
 function isStudent(role) {
     "use strict";
-    if (role && permissions.student) {
+    if (role & permissions.student) {
         return true;
     } else {
         return false;
@@ -81,12 +81,12 @@ module.exports = {
             email: request.body.email,
             password: request.body.password,
             name: request.body.name,
-            ign: request.body.ign,
+            summoner_name: request.body.summoner_name,
             region: request.body.region
         }, schema)
             .then(function (data) {
                 const findUser = new preparedStatement("Find-User", "SELECT account_id FROM account WHERE email = $1 LIMIT 1");
-                const createAdmin = new preparedStatement("Create-Admin", "INSERT INTO account(email, upassword, name, ign, region, role) VALUES( $1, $2, $3, $4, $5, $6) RETURNING account_id");
+                const createAdmin = new preparedStatement("Create-Admin", "INSERT INTO account(email, upassword, name, summoner_name, region, role) VALUES( $1, $2, $3, $4, $5, $6) RETURNING account_id");
 
                 db.any(findUser, [data.email])
                     .then(function (account) {
@@ -95,7 +95,7 @@ module.exports = {
                             bcrypt.hash(data.password, 10)
                                 .then(function (hash) {
                                     data.password = hash;
-                                    db.one(createAdmin, [data.email, data.password, data.name, data.ign, data.region, permissions.admin])
+                                    db.one(createAdmin, [data.email, data.password, data.name, data.summoner_name, data.region, permissions.admin+permissions.coach+permissions.student])
                                         .then(function () {
                                             // return response.status(201).send({success: true,  message: 'created' });
                                             statusCode.created(response);
@@ -124,13 +124,10 @@ module.exports = {
 
     signin: function (request, response, next) {
         "use strict";
-        const verifyAccount = new preparedStatement("Verify-Account", "SELECT account_id, max_weekly_sessions, upassword as password, role FROM account WHERE email = $1LIMIT 1");
+        const verifyAccount = new preparedStatement("Verify-Account", "SELECT account_id, max_weekly_lessons, upassword as password, role FROM account WHERE email = $1LIMIT 1");
 
         // Validate password & email
-        validate({
-            email: request.body.email,
-            password: request.body.password
-        })
+        validate({email: request.body.email, password: request.body.password})
             .then(function (data) {
                 db.any(verifyAccount, [data.email])
                     .then(function (account) {
@@ -139,8 +136,8 @@ module.exports = {
                                 request.body = "";
                                 request.account = account;
                                 // TODO: Implement this method which determines whether student is a student or a coach and sends that in response
-                                request.student = isStudent(account.role);
-                                request.coach = isCoach(account.role);
+                                request.student = isStudent(account[0].role);
+                                request.coach = isCoach(account[0].role);
                                 next();
                             })
                             .catch(function () {
@@ -193,10 +190,8 @@ module.exports = {
         "use strict";
         const account = request.account[0];
         const token = jwt.sign({
-            "accountid": account.account_id,
-            "data": "foo",
-            "test": 123,
-            "maxBook": account.max_weekly_sessions,
+            "account_id": account.account_id,
+            "maxBook": account.max_weekly_lessons,
             "role": account.role
         }, config.secret, {expiresIn: "12h"});
 
